@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Aube Lavender | The Curated Sanctuary</title>
+    <style>
+        :root {
+            --lavender-light: #f3e5f5;
+            --lavender-main: #9575cd;
+            --lavender-dark: #4527a0;
+            --tea-green: #e8f5e9;
+            --border: rgba(149, 117, 205, 0.15);
+        }
+
+        body, html {
+            margin: 0; padding: 0; min-height: 100%;
+            font-family: 'Palatino', serif;
+            background: #fafaff; overflow-x: hidden;
+            color: var(--lavender-dark);
+        }
+
+        /* --- LOADING SCREEN --- */
+        #loading-screen {
+            position: fixed; inset: 0; z-index: 9999;
+            background: var(--lavender-light); display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: transform 1.2s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+        
+        .tea-cup {
+            width: 80px; height: 50px; border: 3px solid var(--lavender-main);
+            border-radius: 0 0 40px 40px; position: relative; cursor: pointer;
+            animation: float 3s ease-in-out infinite;
+        }
+        .tea-cup::after {
+            content: ''; position: absolute; right: -15px; top: 5px;
+            width: 20px; height: 25px; border: 3px solid var(--lavender-main);
+            border-radius: 50%;
+        }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+        /* --- SEARCH & TITLE BAR --- */
+        #top-bar {
+            position: fixed; top: 0; left: 0; right: 0; height: 100px;
+            background: rgba(255, 255, 255, 0.95); border-bottom: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 900; backdrop-filter: blur(10px);
+        }
+
+        #site-title {
+            font-size: 0.8rem; letter-spacing: 10px; text-transform: uppercase;
+            margin-bottom: 12px; color: var(--lavender-main); font-weight: bold;
+        }
+
+        #search-input {
+            width: 400px; border: none; border-bottom: 1px solid var(--lavender-light);
+            padding: 5px; font-family: inherit; font-style: italic;
+            text-align: center; color: var(--lavender-dark); outline: none;
+            transition: 0.3s; font-size: 0.9rem; background: transparent;
+        }
+        #search-input:focus { border-bottom: 1px solid var(--lavender-main); width: 450px; }
+
+        /* --- SIDEBAR ROLODEX (Positioned Higher) --- */
+        #rolodex {
+            width: 60px; position: fixed; left: 0; top: 120px; 
+            display: flex; flex-direction: column; align-items: center;
+            gap: 8px; z-index: 1000;
+        }
+
+        .rolo-tab {
+            width: 38px; height: 80px; background: white;
+            border-radius: 0 8px 8px 0; cursor: pointer; transition: 0.3s;
+            writing-mode: vertical-rl; text-align: center;
+            font-size: 0.6rem; letter-spacing: 2px; color: var(--lavender-main);
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid var(--border); border-left: none;
+        }
+        .rolo-tab:hover, .rolo-tab.active { 
+            background: var(--lavender-main); color: white; width: 45px; 
+        }
+
+        /* --- MAIN CONTENT --- */
+        #main-content { margin-left: 80px; margin-top: 130px; padding: 40px; }
+
+        .mosaic-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px; max-width: 1100px; margin: 0 auto;
+        }
+
+        .product-card {
+            background: white; border: 1px solid var(--border);
+            padding: 30px; border-radius: 2px; text-align: center;
+            text-decoration: none; color: inherit; transition: 0.4s;
+            display: flex; flex-direction: column; align-items: center;
+        }
+        .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.03); }
+        .icon-box { font-size: 1.8rem; margin-bottom: 15px; }
+        .product-card h4 { font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; margin: 10px 0; }
+        .product-card span { font-size: 0.75rem; font-style: italic; color: #999; }
+
+        #sanctuary-clock { position: fixed; bottom: 20px; right: 30px; font-size: 0.7rem; letter-spacing: 3px; opacity: 0.4; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen" onclick="unlock()">
+        <div class="tea-cup"></div>
+        <h2 style="font-weight: 300; letter-spacing: 6px; margin-top: 25px;">THE STEEPING ROOM</h2>
+        <p style="font-size: 0.7rem; opacity: 0.5; letter-spacing: 2px;">INVITING CALM...</p>
+    </div>
+
+    <div id="desktop">
+        <div id="top-bar">
+            <div id="site-title">L'Aube Lavender Sanctuary</div>
+            <input type="text" id="search-input" placeholder="Search a feeling (e.g. 'sad', 'tired', 'restless')..." onkeyup="handleSearch(this.value)">
+        </div>
+
+        <nav id="rolodex">
+            <div class="rolo-tab active" onclick="showCategory('STEEP')">STEEP</div>
+            <div class="rolo-tab" onclick="showCategory('DRIFT')">DRIFT</div>
+            <div class="rolo-tab" onclick="showCategory('ECHO')">ECHO</div>
+            <div class="rolo-tab" onclick="showCategory('SOFT')">SOFT</div>
+            <div class="rolo-tab" onclick="showCategory('GLOW')">GLOW</div>
+        </nav>
+
+        <main id="main-content">
+            <div class="mosaic-grid" id="product-grid"></div>
+        </main>
+
+        <div id="sanctuary-clock">00:00</div>
+    </div>
+
+    <script>
+        const storeData = {
+            'STEEP': { items: [
+                { name: 'Lavender Earl Grey', desc: 'Floral comfort.', icon: '☕', mood: 'sad lonely cold', tags: 'tea' },
+                { name: 'Ceramic Matcha Bowl', desc: 'Earthy grounding.', icon: '🥣', mood: 'anxious restless', tags: 'matcha' },
+                { name: 'Glass Infuser', desc: 'Clarity in sight.', icon: '🫖', mood: 'confused overwhelmed', tags: 'glass' },
+                { name: 'Wildflower Honey', desc: 'Sweet healing.', icon: '🍯', mood: 'sad tired sick', tags: 'honey' },
+                { name: 'Bamboo Whisk', desc: 'Ritual focus.', icon: '🎋', mood: 'distracted busy', tags: 'tool' },
+                { name: 'Silver Strainer', desc: 'Refined elegance.', icon: '🥄', mood: 'cluttered', tags: 'silver' },
+                { name: 'Sleep Tea Blend', desc: 'Nighttime hug.', icon: '🌿', mood: 'restless awake tired', tags: 'herbal' },
+                { name: 'Porcelain Tray', desc: 'Ordered peace.', icon: '🎨', mood: 'chaotic messy', tags: 'tray' }
+            ]},
+            'DRIFT': { items: [
+                { name: 'Lavender Oil', desc: 'Instant calm.', icon: '💧', mood: 'anxious stressed', tags: 'scent' },
+                { name: 'Stone Diffuser', desc: 'Ethereal mist.', icon: '🌫️', mood: 'dry stale bored', tags: 'mist' },
+                { name: 'Sandalwood Incense', desc: 'Deep roots.', icon: '🪵', mood: 'unsettled floating', tags: 'wood' },
+                { name: 'Cedar Candle', desc: 'Warm shadows.', icon: '🕯️', mood: 'lonely cold sad', tags: 'fire' },
+                { name: 'Palo Santo', desc: 'Space clearing.', icon: '✨', mood: 'heavy negative', tags: 'smoke' },
+                { name: 'Linen Room Mist', desc: 'Fresh beginnings.', icon: '🌬️', mood: 'stale trapped', tags: 'spray' },
+                { name: 'Dried Eucalyptus', desc: 'Breath of life.', icon: '🌿', mood: 'congested tired', tags: 'green' },
+                { name: 'Amethyst Cluster', desc: 'Quiet energy.', icon: '💎', mood: 'angry loud', tags: 'stone' }
+            ]},
+            // Note: In a full site, you'd populate ECHO, SOFT, and GLOW similarly
+        };
+
+        function unlock() {
+            document.getElementById('loading-screen').style.transform = "translateY(-100%)";
+            document.getElementById('desktop').style.display = "block";
+            showCategory('STEEP');
+        }
+
+        function showCategory(cat) {
+            document.querySelectorAll('.rolo-tab').forEach(t => {
+                t.classList.remove('active');
+                if(t.innerText === cat) t.classList.add('active');
+            });
+            if(storeData[cat]) renderItems(storeData[cat].items);
+        }
+
+        function renderItems(items) {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <div class="icon-box">${item.icon}</div>
+                    <h4>${item.name}</h4>
+                    <span>${item.desc}</span>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function handleSearch(query) {
+            if (!query) return showCategory('STEEP');
+            const term = query.toLowerCase();
+            const allItems = Object.values(storeData).flatMap(cat => cat.items);
+            
+            const filtered = allItems.filter(item => 
+                item.name.toLowerCase().includes(term) || 
+                item.mood.toLowerCase().includes(term) || 
+                item.tags.toLowerCase().includes(term)
+            );
+            renderItems(filtered);
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('sanctuary-clock').innerText = 
+                now.getHours().toString().padStart(2,'0') + ":" + 
+                now.getMinutes().toString().padStart(2,'0');
+        }
+        setInterval(updateClock, 1000); updateClock();
+    </script>
+</body>
+</html>
