@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Aube Sanctuary | Escape Chimera Cafe</title>
+    <style>
+        :root {
+            --lavender-light: #f3e5f5;
+            --lavender-main: #9575cd;
+            --lavender-dark: #4527a0;
+            --glass: rgba(255, 255, 255, 0.98);
+            --border: rgba(149, 117, 205, 0.12);
+        }
+
+        body, html {
+            margin: 0; padding: 0; min-height: 100%;
+            font-family: 'Palatino', 'Georgia', serif;
+            background: #fafaff; color: var(--lavender-dark);
+            overflow-x: hidden;
+        }
+
+        /* --- TOP BAR --- */
+        #top-bar {
+            position: fixed; top: 0; left: 0; right: 0; height: 60px;
+            background: var(--glass); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            z-index: 900; backdrop-filter: blur(10px); padding: 0 40px;
+        }
+        #site-title { font-size: 0.65rem; letter-spacing: 6px; text-transform: uppercase; color: var(--lavender-main); font-weight: bold; }
+        #search-input {
+            width: 280px; border: none; border-bottom: 1px solid var(--lavender-light);
+            padding: 4px; text-align: right; font-family: inherit; outline: none;
+            background: transparent; font-style: italic; transition: 0.3s; font-size: 0.85rem;
+        }
+
+        /* --- ROLODEX --- */
+        #rolodex {
+            position: fixed; left: 0; top: 80px; width: 50px;
+            display: flex; flex-direction: column; gap: 6px; z-index: 1000;
+        }
+        .rolo-tab {
+            width: 35px; height: 75px; background: white; border: 1px solid var(--border);
+            border-left: none; border-radius: 0 8px 8px 0; cursor: pointer;
+            writing-mode: vertical-rl; text-align: center; font-size: 0.55rem;
+            letter-spacing: 2px; transition: 0.4s; display: flex; align-items: center; justify-content: center;
+        }
+        .rolo-tab:hover, .rolo-tab.active { background: var(--lavender-main); color: white; width: 45px; }
+
+        /* --- REALM HEADER --- */
+        #realm-intro {
+            max-width: 850px; margin: 90px auto 25px; display: flex;
+            align-items: center; gap: 25px; padding: 15px 25px;
+            background: white; border-radius: 12px; border: 1px solid var(--border);
+        }
+        .npc-portrait {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: #eee; object-fit: cover; border: 2px solid var(--lavender-main);
+        }
+        .npc-info h2 { margin: 0; font-weight: 300; letter-spacing: 2px; font-size: 1.2rem; }
+        .npc-info p { margin: 4px 0; font-style: italic; opacity: 0.7; font-size: 0.85rem; line-height: 1.4; }
+
+        /* --- PRODUCT GRID --- */
+        .mosaic-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px; max-width: 1000px; margin: 0 auto 80px;
+        }
+        .product-card {
+            background: white; padding: 20px; border: 1px solid var(--border);
+            border-radius: 4px; text-align: center; text-decoration: none;
+            color: inherit; transition: 0.3s; display: flex; flex-direction: column; align-items: center;
+        }
+        /* Clickable feedback */
+        .product-card:hover { 
+            transform: translateY(-3px); 
+            border-color: var(--lavender-main); 
+            box-shadow: 0 5px 15px rgba(149, 117, 205, 0.1);
+        }
+        .product-card .icon-box { font-size: 1.8rem; margin-bottom: 12px; }
+        .product-card h4 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0; }
+        .product-card span { font-size: 0.75rem; color: #999; font-style: italic; }
+        .explore-tag { font-size: 0.6rem; color: var(--lavender-main); margin-top: 10px; letter-spacing: 1px; opacity: 0; transition: 0.3s; }
+        .product-card:hover .explore-tag { opacity: 1; }
+
+        footer { text-align: center; padding: 30px; font-size: 0.65rem; letter-spacing: 3px; opacity: 0.4; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <div id="top-bar">
+        <div id="site-title">L'Aube Sanctuary</div>
+        <input type="text" id="search-input" placeholder="Search the realms..." onkeyup="handleSearch(this.value)">
+    </div>
+
+    <nav id="rolodex">
+        <div class="rolo-tab" onclick="showRealm('Star')">STAR</div>
+        <div class="rolo-tab" onclick="showRealm('Chari')">CHARI</div>
+        <div class="rolo-tab" onclick="showRealm('Milo')">MILO</div>
+        <div class="rolo-tab" onclick="showRealm('Hans')">HANS</div>
+        <div class="rolo-tab active" onclick="showRealm('Mik')">MIK</div>
+    </nav>
+
+    <div id="realm-intro">
+        <img id="npc-img" src="" class="npc-portrait">
+        <div class="npc-info">
+            <h2 id="npc-name">NPC Name</h2>
+            <p id="npc-lore">Lore description...</p>
+        </div>
+    </div>
+
+    <div class="mosaic-grid" id="product-grid"></div>
+
+    <footer>© ESCAPECHIMERACAFE</footer>
+
+    <script>
+        const npcData = {
+            'Mik': {
+                lore: "A cyber-cat vlogger bridging the gap between high-tech gear and high-energy humor.",
+                img: "https://images.unsplash.com/photo-1519669011783-4eaa95fa1b7d?q=80&w=200", 
+                items: [
+                    { name: 'Rose Gold Halo Light', desc: 'Studio-grade vlogging glow.', icon: '⭕', tags: 'tech light', link: 'https://example.com/halo-light' },
+                    { name: 'Yellow Tech Headset', desc: 'Noise-canceling neon audio.', icon: '🎧', tags: 'music tech', link: 'https://example.com/headset' },
+                    { name: 'The Cyber-Cat Joke Book', desc: 'Puns for the digital age.', icon: '🃏', tags: 'joke book', link: '#' },
+                    { name: 'Motorcycle Boots', desc: 'Waterproof cyber-chic.', icon: '👢', tags: 'boots style', link: '#' },
+                    { name: 'Rose Gold Mic', desc: 'Professional stream audio.', icon: '🎤', tags: 'tech vlog', link: '#' },
+                    { name: 'Neon Desk Mat', desc: 'Low-friction vlogging surface.', icon: '🎨', tags: 'gear', link: '#' },
+                    { name: 'Vlogger Camera Kit', desc: '4K mobility for the cat-hybrid.', icon: '📸', tags: 'tech', link: '#' },
+                    { name: 'Tech-Wear Jacket', desc: 'Reflective and resilient.', icon: '🧥', tags: 'style', link: '#' }
+                ]
+            },
+            'Star': {
+                lore: "An introverted coffee lover who finds romance in the Word and the garden.",
+                img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200",
+                items: [
+                    { name: 'Dark Roast Beans', desc: 'Bold morning fuel.', icon: '🫘', tags: 'coffee', link: '#' },
+                    { name: 'The Holy Bible', desc: 'Spirit and Truth.', icon: '📖', tags: 'bible', link: '#' },
+                    { name: 'Copper Pour-Over', desc: 'Hand-brewed precision.', icon: '☕', tags: 'coffee', link: '#' },
+                    { name: 'Rose Soy Candle', desc: 'The scent of a quiet garden.', icon: '🌹', tags: 'rose', link: '#' },
+                    { name: 'Classic Romance Novel', desc: 'A timeless love story.', icon: '📚', tags: 'book', link: '#' },
+                    { name: 'Rosewater Spritz', desc: 'Refreshing floral mist.', icon: '🌬️', tags: 'rose', link: '#' },
+                    { name: 'Ceramic Mug Set', desc: 'Hand-glazed for comfort.', icon: '🍶', tags: 'coffee', link: '#' },
+                    { name: 'Pressed Flower Press', desc: 'Preserving garden memories.', icon: '🖼️', tags: 'rose', link: '#' }
+                ]
+            },
+            'Chari': {
+                lore: "Softness, lavender, and the quiet company of two white support rats.",
+                img: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=200",
+                items: [
+                    { name: 'Lavender Loose Leaf', desc: 'Steeping serenity.', icon: '🍵', tags: 'lavender', link: '#' },
+                    { name: 'Silk Sleep Mask', desc: 'Total darkness, total peace.', icon: '🕶️', tags: 'relax', link: '#' },
+                    { name: 'Rat Support Nutrients', desc: 'Health for the little ones.', icon: '🐭', tags: 'pets', link: '#' },
+                    { name: 'Fleece Pet Nest', desc: 'A warm home for white rats.', icon: '🧶', tags: 'pets', link: '#' },
+                    { name: 'Lavender Oil Roller', desc: 'On-the-go anxiety relief.', icon: '💧', tags: 'lavender', link: '#' },
+                    { name: 'Plush Anxiety Pillow', desc: 'Weighted for security.', icon: '☁️', tags: 'relax', link: '#' },
+                    { name: 'White Knit Blanket', desc: 'The ultimate safety wrap.', icon: '🧣', tags: 'soft', link: '#' },
+                    { name: 'Calming Face Mist', desc: 'Lavender and aloe.', icon: '🧴', tags: 'relax', link: '#' }
+                ]
+            },
+            'Milo': {
+                lore: "Finding Zen in the garden and strength in the Scripture.",
+                img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200",
+                items: [
+                    { name: 'Fresh Mint Leaves', desc: 'Cooling focus.', icon: '🍃', tags: 'mint', link: '#' },
+                    { name: 'Zen Meditation Guide', desc: 'Steps toward stillness.', icon: '🧘', tags: 'reading', link: '#' },
+                    { name: 'The Holy Bible', desc: 'Scriptural wisdom.', icon: '📕', tags: 'bible', link: '#' },
+                    { name: 'Heirloom Seed Kit', desc: 'Start your own herbal garden.', icon: '🌿', tags: 'garden', link: '#' },
+                    { name: 'Cast Iron Kettle', desc: 'Built to last generations.', icon: '🫖', tags: 'tea', link: '#' },
+                    { name: 'Wooden Garden Tools', desc: 'Connect with the soil.', icon: '🎋', tags: 'garden', link: '#' },
+                    { name: 'Garden Kneeling Pad', desc: 'Comfort for long tending.', icon: '🛡️', tags: 'garden', link: '#' },
+                    { name: 'Mint Infused Honey', desc: 'Sweetness with a kick.', icon: '🍯', tags: 'mint', link: '#' }
+                ]
+            },
+            'Hans': {
+                lore: "A distinguished teasnob who values etiquette and academic history.",
+                img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200",
+                items: [
+                    { name: 'Imperial Earl Grey', desc: 'The gold standard.', icon: '☕', tags: 'tea', link: '#' },
+                    { name: 'Sterling Tea Strainer', desc: 'A sophisticated tool.', icon: '🥄', tags: 'tea', link: '#' },
+                    { name: 'Victorian Etiquette', desc: 'Social conduct for the refined.', icon: '📜', tags: 'book', link: '#' },
+                    { name: 'British Tea History', desc: 'A journey through time.', icon: '🏛️', tags: 'history', link: '#' },
+                    { name: 'Othello (Folio)', desc: 'Shakespearean tragedy.', icon: '🎭', tags: 'shakespeare', link: '#' },
+                    { name: 'Fine Bone China Set', desc: 'Translucent and elegant.', icon: '🍵', tags: 'tea', link: '#' },
+                    { name: 'Tea Merchants Log', desc: 'A guide to world harvests.', icon: '🌱', tags: 'history', link: '#' },
+                    { name: 'Fountain Pen & Ink', desc: 'For distinguished notes.', icon: '🖋️', tags: 'academic', link: '#' }
+                ]
+            }
+        };
+
+        function renderGrid(items) {
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            items.forEach(item => {
+                const card = document.createElement('a');
+                card.className = 'product-card';
+                card.href = item.link;
+                card.target = "_blank"; // Opens in new tab
+                card.innerHTML = `
+                    <div class="icon-box">${item.icon}</div>
+                    <h4>${item.name}</h4>
+                    <span>${item.desc}</span>
+                    <div class="explore-tag">EXPLORE →</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function showRealm(name) {
+            document.querySelectorAll('.rolo-tab').forEach(t => {
+                t.classList.remove('active');
+                if(t.innerText === name.toUpperCase()) t.classList.add('active');
+            });
+            const npc = npcData[name];
+            document.getElementById('npc-name').innerText = name.toUpperCase() + "'S REALM";
+            document.getElementById('npc-lore').innerText = npc.lore;
+            document.getElementById('npc-img').src = npc.img;
+            renderGrid(npc.items);
+        }
+
+        function handleSearch(query) {
+            const term = query.toLowerCase();
+            if(!term) {
+                const activeTab = document.querySelector('.rolo-tab.active').innerText;
+                return showRealm(activeTab.charAt(0) + activeTab.slice(1).toLowerCase());
+            }
+            const allItems = Object.values(npcData).flatMap(n => n.items);
+            const filtered = allItems.filter(i => 
+                i.name.toLowerCase().includes(term) || 
+                i.tags.toLowerCase().includes(term)
+            );
+            renderGrid(filtered);
+        }
+
+        // Initialize with Mik
+        showRealm('Mik');
+    </script>
+</body>
+</html>
