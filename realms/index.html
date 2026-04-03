@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Aube Sanctuary | Escape Chimera Cafe</title>
+    <style>
+        :root {
+            --lavender-light: #f3e5f5;
+            --lavender-main: #9575cd;
+            --lavender-dark: #4527a0;
+            --glass: rgba(255, 255, 255, 0.9);
+            --border: rgba(149, 117, 205, 0.15);
+        }
+
+        body, html {
+            margin: 0; padding: 0; min-height: 100%;
+            font-family: 'Palatino', serif;
+            background: #fafaff; color: var(--lavender-dark);
+            overflow-x: hidden;
+        }
+
+        /* --- LOADING GATES --- */
+        #loading-screen {
+            position: fixed; inset: 0; z-index: 9999;
+            background: var(--lavender-light); display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: transform 1s cubic-bezier(0.7, 0, 0.3, 1);
+        }
+
+        /* --- TOP NAV & SEARCH --- */
+        #top-bar {
+            position: fixed; top: 0; left: 0; right: 0; height: 110px;
+            background: var(--glass); border-bottom: 1px solid var(--border);
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 900; backdrop-filter: blur(10px);
+        }
+        #site-title { font-size: 0.9rem; letter-spacing: 8px; text-transform: uppercase; color: var(--lavender-main); margin-bottom: 10px; }
+        #search-input {
+            width: 350px; border: none; border-bottom: 1px solid var(--lavender-light);
+            padding: 5px; text-align: center; font-family: inherit; outline: none;
+            background: transparent; font-style: italic; transition: 0.3s;
+        }
+        #search-input:focus { width: 420px; border-color: var(--lavender-main); }
+
+        /* --- ROLODEX (Higher Position) --- */
+        #rolodex {
+            position: fixed; left: 0; top: 130px; width: 60px;
+            display: flex; flex-direction: column; gap: 10px; z-index: 1000;
+        }
+        .rolo-tab {
+            width: 45px; height: 90px; background: white; border: 1px solid var(--border);
+            border-left: none; border-radius: 0 10px 10px 0; cursor: pointer;
+            writing-mode: vertical-rl; text-align: center; font-size: 0.7rem;
+            letter-spacing: 2px; transition: 0.4s; display: flex; align-items: center; justify-content: center;
+        }
+        .rolo-tab:hover, .rolo-tab.active { background: var(--lavender-main); color: white; width: 55px; }
+
+        /* --- REALM HEADER (NPC IMAGE) --- */
+        #realm-intro {
+            max-width: 900px; margin: 140px auto 30px; display: flex;
+            align-items: center; gap: 30px; padding: 20px;
+            background: white; border-radius: 20px; border: 1px solid var(--border);
+        }
+        .npc-portrait {
+            width: 120px; height: 120px; border-radius: 50%;
+            background: var(--lavender-light); object-fit: cover;
+            border: 3px solid var(--lavender-main);
+        }
+        .npc-info h2 { margin: 0; font-weight: 300; letter-spacing: 3px; }
+        .npc-info p { margin: 5px 0; font-style: italic; opacity: 0.7; font-size: 0.9rem; }
+
+        /* --- PRODUCT GRID --- */
+        .mosaic-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px; max-width: 1000px; margin: 0 auto 100px;
+        }
+        .product-card {
+            background: white; padding: 25px; border: 1px solid var(--border);
+            border-radius: 12px; text-align: center; text-decoration: none;
+            color: inherit; transition: 0.3s;
+        }
+        .product-card:hover { transform: translateY(-5px); border-color: var(--lavender-main); }
+        .product-card .price { display: block; margin-top: 10px; font-size: 0.8rem; font-weight: bold; }
+
+        /* --- THE CODEX (NPC INFO) --- */
+        #codex-btn {
+            position: fixed; bottom: 30px; left: 30px; font-size: 1.5rem;
+            cursor: pointer; background: white; width: 50px; height: 50px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; box-shadow: 0 4px 15px rgba(0,0,0,0.1); z-index: 2000;
+        }
+        #codex-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+            display: none; align-items: center; justify-content: center; z-index: 3000;
+            backdrop-filter: blur(5px);
+        }
+        #codex-content {
+            background: white; padding: 40px; width: 80%; max-width: 500px;
+            border-radius: 20px; position: relative;
+        }
+
+        footer { text-align: center; padding: 40px; font-size: 0.7rem; letter-spacing: 2px; opacity: 0.5; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen" onclick="this.style.transform='translateY(-100%)'">
+        <h2 style="letter-spacing: 8px; font-weight: 300;">ENTERING THE CAFE</h2>
+        <p style="font-size: 0.7rem; opacity: 0.6;">CLICK TO WAKE THE NPC's</p>
+    </div>
+
+    <div id="top-bar">
+        <div id="site-title">L'Aube Sanctuary</div>
+        <input type="text" id="search-input" placeholder="Search by mood or item..." onkeyup="handleSearch(this.value)">
+    </div>
+
+    <nav id="rolodex">
+        <div class="rolo-tab active" onclick="showRealm('Star')">STAR</div>
+        <div class="rolo-tab" onclick="showRealm('Chari')">CHARI</div>
+        <div class="rolo-tab" onclick="showRealm('Milo')">MILO</div>
+        <div class="rolo-tab" onclick="showRealm('Hans')">HANS</div>
+    </nav>
+
+    <div id="realm-intro">
+        <img id="npc-img" src="" class="npc-portrait">
+        <div class="npc-info">
+            <h2 id="npc-name">Character Name</h2>
+            <p id="npc-lore">Character Lore description goes here...</p>
+        </div>
+    </div>
+
+    <div class="mosaic-grid" id="product-grid"></div>
+
+    <div id="codex-btn" onclick="toggleCodex()">📖</div>
+
+    <div id="codex-overlay" onclick="toggleCodex()">
+        <div id="codex-content" onclick="event.stopPropagation()">
+            <h3 style="letter-spacing: 3px; border-bottom: 1px solid var(--lavender-light); padding-bottom: 10px;">THE RESIDENTS</h3>
+            <p><b>Star:</b> The energetic barista. She thrives on caffeine and sunbeams.</p>
+            <p><b>Chari:</b> A tender soul who finds safety in lavender scents and soft textures.</p>
+            <p><b>Milo:</b> A quiet scholar of Zen and the Word. Mint tea is his companion.</p>
+            <p><b>Hans:</b> The sophisticated bibliophile. Don't touch his first editions.</p>
+            <button onclick="toggleCodex()" style="margin-top: 20px; border: none; background: var(--lavender-main); color: white; padding: 10px 20px; border-radius: 5px; cursor: pointer;">Close</button>
+        </div>
+    </div>
+
+    <footer>© ESCAPECHIMERACAFE</footer>
+
+    <script>
+        const npcData = {
+            'Star': {
+                lore: "She reigns over the Coffee Realm, sparking energy in the weary.",
+                img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200", // Placeholder
+                items: [
+                    { name: 'Cold Brew Kit', desc: 'Smooth, 24-hour steeping.', icon: '🧊', tags: 'energy morning', link: '#' },
+                    { name: 'Arabica Beans', desc: 'Ethically sourced brightness.', icon: '🫘', tags: 'strong smell', link: '#' },
+                    { name: 'Milk Frother', desc: 'Cloud-like foam.', icon: '☁️', tags: 'cream soft', link: '#' },
+                    { name: 'Vintage Grinder', desc: 'Manual precision.', icon: '⚙️', tags: 'ritual wood', link: '#' },
+                    { name: 'Espresso Cups', desc: 'Tiny ceramic joys.', icon: '☕', tags: 'small art', link: '#' },
+                    { name: 'Caramel Syrup', desc: 'A touch of sunlight.', icon: '🍯', tags: 'sweet gold', link: '#' },
+                    { name: 'Gooseneck Pour', desc: 'The barista\'s wand.', icon: '🚿', tags: 'tool water', link: '#' },
+                    { name: 'Coffee Candle', desc: 'Wake up the room.', icon: '🕯️', tags: 'scent morning', link: '#' }
+                ]
+            },
+            'Chari': {
+                lore: "Anxiety is heavy, but her lavender garden is light.",
+                img: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=200",
+                items: [
+                    { name: 'Weighted Blanket', desc: 'A heavy, soothing hug.', icon: '🛌', tags: 'safe anxiety', link: '#' },
+                    { name: 'Lavender Mist', desc: 'Calm in a bottle.', icon: '🌬️', tags: 'purple smell', link: '#' },
+                    { name: 'Amethyst Stone', desc: 'Negative energy filter.', icon: '💎', tags: 'crystal quiet', link: '#' },
+                    { name: 'Eye Mask', desc: 'Silk-lined darkness.', icon: '🕶️', tags: 'sleep soft', link: '#' },
+                    { name: 'Stress Dough', desc: 'Scented tactile relief.', icon: '🧶', tags: 'touch play', link: '#' },
+                    { name: 'Herbal Balm', desc: 'Temple massage oil.', icon: '🧴', tags: 'skin relax', link: '#' },
+                    { name: 'Journal of Peace', desc: 'Write the worries away.', icon: '📓', tags: 'write paper', link: '#' },
+                    { name: 'Fidget Ring', desc: 'Subtle motion.', icon: '💍', tags: 'hand focus', link: '#' }
+                ]
+            }
+            // Milo and Hans would be added here in the same format!
+        };
+
+        function showRealm(name) {
+            document.querySelectorAll('.rolo-tab').forEach(t => {
+                t.classList.remove('active');
+                if(t.innerText === name.toUpperCase()) t.classList.add('active');
+            });
+
+            const npc = npcData[name];
+            document.getElementById('npc-name').innerText = name + "'s Realm";
+            document.getElementById('npc-lore').innerText = npc.lore;
+            document.getElementById('npc-img').src = npc.img;
+
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            npc.items.forEach(item => {
+                const card = document.createElement('a');
+                card.className = 'product-card';
+                card.href = item.link;
+                card.innerHTML = `
+                    <div style="font-size: 2rem; margin-bottom: 10px;">${item.icon}</div>
+                    <h4 style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px;">${item.name}</h4>
+                    <span style="font-size: 0.7rem; color: #888;">${item.desc}</span>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleCodex() {
+            const overlay = document.getElementById('codex-overlay');
+            overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function handleSearch(query) {
+            const term = query.toLowerCase();
+            const allItems = Object.values(npcData).flatMap(npc => npc.items);
+            const filtered = allItems.filter(i => i.name.toLowerCase().includes(term) || i.tags.toLowerCase().includes(term));
+            
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            filtered.forEach(item => {
+                // Same render logic as showRealm
+                const card = document.createElement('a');
+                card.className = 'product-card';
+                card.innerHTML = `<div style="font-size: 2rem;">${item.icon}</div><h4>${item.name}</h4><span>${item.desc}</span>`;
+                grid.appendChild(card);
+            });
+        }
+
+        // Initialize
+        showRealm('Star');
+    </script>
+</body>
+</html>
