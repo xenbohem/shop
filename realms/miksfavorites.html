@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Aube Sanctuary | Escape Chimera Cafe</title>
+    <style>
+        :root {
+            --lavender-light: #f3e5f5;
+            --lavender-main: #9575cd;
+            --lavender-dark: #4527a0;
+            --cyber-gold: #ffd700;
+            --glass: rgba(255, 255, 255, 0.98);
+            --border: rgba(149, 117, 205, 0.12);
+        }
+
+        body, html {
+            margin: 0; padding: 0; min-height: 100%;
+            font-family: 'Palatino', 'Georgia', serif;
+            background: #fafaff; color: var(--lavender-dark);
+            overflow-x: hidden;
+        }
+
+        /* --- LOADING GATES --- */
+        #loading-screen {
+            position: fixed; inset: 0; z-index: 9999;
+            background: var(--lavender-light); display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: transform 1s cubic-bezier(0.7, 0, 0.3, 1);
+            cursor: pointer;
+        }
+
+        /* --- TOP BAR --- */
+        #top-bar {
+            position: fixed; top: 0; left: 0; right: 0; height: 60px;
+            background: var(--glass); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            z-index: 900; backdrop-filter: blur(10px); padding: 0 40px;
+        }
+        #site-title { font-size: 0.65rem; letter-spacing: 6px; text-transform: uppercase; color: var(--lavender-main); font-weight: bold; }
+        #search-input {
+            width: 280px; border: none; border-bottom: 1px solid var(--lavender-light);
+            padding: 4px; text-align: right; font-family: inherit; outline: none;
+            background: transparent; font-style: italic; transition: 0.3s; font-size: 0.85rem;
+        }
+
+        /* --- ROLODEX (Updated for 5 Tabs) --- */
+        #rolodex {
+            position: fixed; left: 0; top: 80px; width: 50px;
+            display: flex; flex-direction: column; gap: 6px; z-index: 1000;
+        }
+        .rolo-tab {
+            width: 35px; height: 75px; background: white; border: 1px solid var(--border);
+            border-left: none; border-radius: 0 8px 8px 0; cursor: pointer;
+            writing-mode: vertical-rl; text-align: center; font-size: 0.55rem;
+            letter-spacing: 2px; transition: 0.4s; display: flex; align-items: center; justify-content: center;
+        }
+        .rolo-tab:hover, .rolo-tab.active { background: var(--lavender-main); color: white; width: 45px; }
+
+        /* --- REALM HEADER --- */
+        #realm-intro {
+            max-width: 850px; margin: 90px auto 25px; display: flex;
+            align-items: center; gap: 25px; padding: 15px 25px;
+            background: white; border-radius: 12px; border: 1px solid var(--border);
+        }
+        .npc-portrait {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: #eee; object-fit: cover;
+            border: 2px solid var(--lavender-main);
+        }
+        .npc-info h2 { margin: 0; font-weight: 300; letter-spacing: 2px; font-size: 1.2rem; }
+        .npc-info p { margin: 4px 0; font-style: italic; opacity: 0.7; font-size: 0.85rem; line-height: 1.4; }
+
+        /* --- PRODUCT GRID --- */
+        .mosaic-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px; max-width: 1000px; margin: 0 auto 80px;
+        }
+        .product-card {
+            background: white; padding: 20px; border: 1px solid var(--border);
+            border-radius: 4px; text-align: center; text-decoration: none;
+            color: inherit; transition: 0.3s; display: flex; flex-direction: column; align-items: center;
+        }
+        .product-card:hover { transform: translateY(-3px); border-color: var(--lavender-main); }
+        .product-card .icon-box { font-size: 1.8rem; margin-bottom: 12px; }
+        .product-card h4 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0; }
+        .product-card span { font-size: 0.75rem; color: #999; font-style: italic; }
+
+        /* --- CODEX --- */
+        #codex-btn {
+            position: fixed; bottom: 25px; left: 25px; font-size: 1.2rem;
+            cursor: pointer; background: white; width: 45px; height: 45px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 2000;
+            border: 1px solid var(--border);
+        }
+        #codex-overlay {
+            position: fixed; inset: 0; background: rgba(255, 255, 255, 0.95);
+            display: none; align-items: center; justify-content: center; z-index: 3000;
+            backdrop-filter: blur(8px);
+        }
+        #codex-content { background: white; padding: 40px; width: 85%; max-width: 450px; border-radius: 8px; border: 1px solid var(--border); }
+        
+        footer { text-align: center; padding: 30px; font-size: 0.65rem; letter-spacing: 3px; opacity: 0.4; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen" onclick="this.style.transform='translateY(-100%)'">
+        <h2 style="letter-spacing: 10px; font-weight: 300; color: var(--lavender-main);">L'AUBE</h2>
+        <p style="font-size: 0.6rem; opacity: 0.5; letter-spacing: 4px;">REBOOTING LORE SYSTEMS...</p>
+    </div>
+
+    <div id="top-bar">
+        <div id="site-title">L'Aube Sanctuary</div>
+        <input type="text" id="search-input" placeholder="Search a mood or gear..." onkeyup="handleSearch(this.value)">
+    </div>
+
+    <nav id="rolodex">
+        <div class="rolo-tab" onclick="showRealm('Star')">STAR</div>
+        <div class="rolo-tab" onclick="showRealm('Chari')">CHARI</div>
+        <div class="rolo-tab" onclick="showRealm('Milo')">MILO</div>
+        <div class="rolo-tab" onclick="showRealm('Hans')">HANS</div>
+        <div class="rolo-tab active" onclick="showRealm('Mik')">MIK</div>
+    </nav>
+
+    <div id="realm-intro">
+        <img id="npc-img" src="" class="npc-portrait">
+        <div class="npc-info">
+            <h2 id="npc-name">NPC Name</h2>
+            <p id="npc-lore">Lore description...</p>
+        </div>
+    </div>
+
+    <div class="mosaic-grid" id="product-grid"></div>
+
+    <div id="codex-btn" onclick="toggleCodex()">📖</div>
+
+    <div id="codex-overlay" onclick="toggleCodex()">
+        <div id="codex-content" onclick="event.stopPropagation()">
+            <h3 style="letter-spacing: 4px; font-weight: 300; border-bottom: 1px solid var(--lavender-light); padding-bottom: 15px;">CAFE DATA LOGS</h3>
+            <p style="font-size: 0.85rem;"><b>Star:</b> Coffee-loving introvert. Finds romance in roses and the Word.</p>
+            <p style="font-size: 0.85rem;"><b>Chari:</b> Tender soul. Safe in the haze of lavender with her white rats.</p>
+            <p style="font-size: 0.85rem;"><b>Milo:</b> Mindful gardener. Studies Zen and the Bible with mint tea.</p>
+            <p style="font-size: 0.85rem;"><b>Hans:</b> The Distinguished Teasnob. Academic, confident, and strict.</p>
+            <p style="font-size: 0.85rem;"><b>Mik:</b> Cyber-cat hybrid vlogger. Loves music, gear, and a good joke.</p>
+            <button onclick="toggleCodex()" style="margin-top: 25px; border: 1px solid var(--lavender-main); background: transparent; color: var(--lavender-main); padding: 8px 20px; border-radius: 4px; cursor: pointer;">RETURN</button>
+        </div>
+    </div>
+
+    <footer>© ESCAPECHIMERACAFE</footer>
+
+    <script>
+        const npcData = {
+            'Mik': {
+                lore: "A cyberhybrid human-cat vlogger who brings a neon pulse to the sanctuary. Mik is never without her gear, her music, or a terrible pun to lighten the mood.",
+                img: "http://googleusercontent.com/image_collection/image_retrieval/5472702585727715875_1", 
+                items: [
+                    { name: 'Rose Gold Halo Light', desc: 'The perfect glow for vlogging.', icon: '⭕', tags: 'mik gear tech light', link: '#' },
+                    { name: 'Bright Yellow Headset', desc: 'High-fidelity audio, neon style.', icon: '🎧', tags: 'mik music tech yellow', link: '#' },
+                    { name: 'Cyber Cat Joke Book', desc: 'A collection of binary humor.', icon: '🃏', tags: 'mik joke book fun', link: '#' },
+                    { name: 'Tough Motorcycle Boots', desc: 'Built for the concrete jungle.', icon: '👢', tags: 'mik clothing boots', link: '#' },
+                    { name: 'Portable Vlog Mic', desc: 'Crystal clear street audio.', icon: '🎤', tags: 'mik tech vlogger', link: '#' },
+                    { name: 'Rose Gold Phone Stand', desc: 'Steady hands for your vlog.', icon: '📱', tags: 'mik tech rosegold', link: '#' },
+                    { name: 'High-Top Sneakers', desc: 'For running between streams.', icon: '👟', tags: 'mik clothing style', link: '#' },
+                    { name: 'USB-C Fast Charger', desc: 'Keep the cyber-cat powered up.', icon: '🔌', tags: 'mik tech power', link: '#' }
+                ]
+            },
+            'Star': {
+                lore: "An introverted coffee lover who finds romance in the petals of a rose and the verses of the Bible.",
+                img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200",
+                items: [
+                    { name: 'Dark Roast Blend', desc: 'Quiet morning energy.', icon: '🫘', tags: 'star coffee', link: '#' },
+                    { name: 'The Holy Bible', desc: 'Spiritual grounding.', icon: '📖', tags: 'star bible reading', link: '#' },
+                    { name: 'Ceramic Pour-Over', desc: 'The ritual of the brew.', icon: '☕', tags: 'star coffee tool', link: '#' },
+                    { name: 'Rose Scented Candle', desc: 'A garden in her room.', icon: '🌹', tags: 'star rose scent', link: '#' },
+                    { name: 'Victorian Romance', desc: 'Escapism in paper.', icon: '📚', tags: 'star reading books', link: '#' },
+                    { name: 'Dried Rose Buds', desc: 'For tea and beauty.', icon: '🥀', tags: 'star rose', link: '#' },
+                    { name: 'Insulated Travel Mug', desc: 'Stay warm, stay quiet.', icon: '🥤', tags: 'star coffee', link: '#' },
+                    { name: 'Linen Bookmark', desc: 'Keep your place.', icon: '🔖', tags: 'star reading', link: '#' }
+                ]
+            },
+            'Chari': {
+                lore: "Finding calm through lavender and the soft company of her two white support rats.",
+                img: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=200",
+                items: [
+                    { name: 'Lavender Tea', desc: 'Sip away the stress.', icon: '🍵', tags: 'chari lavender', link: '#' },
+                    { name: 'Weighted Face Mask', desc: 'Lavender-infused rest.', icon: '🕶️', tags: 'chari relax', link: '#' },
+                    { name: 'Support Rat Nutrient', desc: 'For her little white friends.', icon: '🐭', tags: 'chari pets', link: '#' },
+                    { name: 'Silk Pet Hammock', desc: 'Safe rest for white rats.', icon: '🧶', tags: 'chari pets', link: '#' },
+                    { name: 'Lavender Aromatherapy', desc: 'Mist of peace.', icon: '🌫️', tags: 'chari scent', link: '#' },
+                    { name: 'Heating Pillow', desc: 'Lavender scented warmth.', icon: '☁️', tags: 'chari relax', link: '#' },
+                    { name: 'White Linen Wrap', desc: 'A soft, safe embrace.', icon: '🧣', tags: 'chari soft', link: '#' },
+                    { name: 'Stress Relief Balm', desc: 'Calm in a tin.', icon: '🧴', tags: 'chari relax', link: '#' }
+                ]
+            },
+            'Milo': {
+                lore: "A scholar who gardens with mindfulness, balancing Zen wisdom with the Word.",
+                img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200",
+                items: [
+                    { name: 'Spearmint Tea', desc: 'Clearing the mind.', icon: '🍃', tags: 'milo mint', link: '#' },
+                    { name: 'Zen Study Guide', desc: 'The art of being.', icon: '🧘', tags: 'milo zen reading', link: '#' },
+                    { name: 'The Holy Bible', desc: 'Living Water.', icon: '📕', tags: 'milo bible reading', link: '#' },
+                    { name: 'Herbal Garden Book', desc: 'Soil and soul.', icon: '🌿', tags: 'milo garden', link: '#' },
+                    { name: 'Cast Iron Kettle', desc: 'Heavy, grounding metal.', icon: '🫖', tags: 'milo tea tool', link: '#' },
+                    { name: 'Bamboo Garden Trowel', desc: 'Sustainable tending.', icon: '🎋', tags: 'milo garden tool', link: '#' },
+                    { name: 'Meditation Bench', desc: 'Postured for peace.', icon: '🪑', tags: 'milo zen', link: '#' },
+                    { name: 'Peppermint Essential Oil', desc: 'Focus and clarity.', icon: '💧', tags: 'milo mint scent', link: '#' }
+                ]
+            },
+            'Hans': {
+                lore: "A distinguished teasnob and historian who values etiquette above all else.",
+                img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200",
+                items: [
+                    { name: 'Imperial Earl Grey', desc: 'Pure Bergamot luxury.', icon: '☕', tags: 'hans tea', link: '#' },
+                    { name: 'Silver Tea Infuser', desc: 'Precise metalwork.', icon: '🥄', tags: 'hans tea tool', link: '#' },
+                    { name: 'Book of Etiquette', desc: 'The rules of grace.', icon: '📜', tags: 'hans etiquette book', link: '#' },
+                    { name: 'British History', desc: 'Legacy of the Crown.', icon: '🏛️', tags: 'hans history', link: '#' },
+                    { name: 'Othello', desc: 'Shakespearean depth.', icon: '🎭', tags: 'hans shakespeare book', link: '#' },
+                    { name: 'Fine Bone China', desc: 'Translucent perfection.', icon: '🍵', tags: 'hans tea tool', link: '#' },
+                    { name: 'Tea History Guide', desc: 'Origin of the brew.', icon: '🌱', tags: 'hans tea history', link: '#' },
+                    { name: 'Leather Journal', desc: 'For distinguished notes.', icon: '📓', tags: 'hans book', link: '#' }
+                ]
+            }
+        };
+
+        function showRealm(name) {
+            document.querySelectorAll('.rolo-tab').forEach(t => {
+                t.classList.remove('active');
+                if(t.innerText === name.toUpperCase()) t.classList.add('active');
+            });
+
+            const npc = npcData[name];
+            document.getElementById('npc-name').innerText = name.toUpperCase() + "'S REALM";
+            document.getElementById('npc-lore').innerText = npc.lore;
+            document.getElementById('npc-img').src = npc.img;
+
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            
+            npc.items.forEach(item => {
+                const card = document.createElement('a');
+                card.className = 'product-card';
+                card.href = item.link;
+                card.innerHTML = `
+                    <div class="icon-box">${item.icon}</div>
+                    <h4>${item.name}</h4>
+                    <span>${item.desc}</span>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleCodex() {
+            const overlay = document.getElementById('codex-overlay');
+            overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function handleSearch(query) {
+            const term = query.toLowerCase();
+            if(!term) return showRealm(document.querySelector('.rolo-tab.active').innerText.charAt(0) + document.querySelector('.rolo-tab.active').innerText.slice(1).toLowerCase());
+            const allItems = Object.values(npcData).flatMap(n => n.items);
+            const filtered = allItems.filter(i => i.name.toLowerCase().includes(term) || i.tags?.toLowerCase().includes(term));
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            filtered.forEach(item => {
+                const card = document.createElement('a');
+                card.className = 'product-card';
+                card.innerHTML = `<div class="icon-box">${item.icon}</div><h4>${item.name}</h4><span>${item.desc}</span>`;
+                grid.appendChild(card);
+            });
+        }
+
+        showRealm('Mik'); // Start with the new character!
+    </script>
+</body>
+</html>
