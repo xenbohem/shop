@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L'Aube Sanctuary | Escape Chimera Cafe</title>
+    <style>
+        :root {
+            --lavender-light: #f3e5f5;
+            --lavender-main: #9575cd;
+            --lavender-dark: #4527a0;
+            --glass: rgba(255, 255, 255, 0.98);
+            --border: rgba(149, 117, 205, 0.12);
+        }
+
+        body, html {
+            margin: 0; padding: 0; min-height: 100%;
+            font-family: 'Palatino', 'Georgia', serif;
+            background: #fafaff; color: var(--lavender-dark);
+            overflow-x: hidden;
+        }
+
+        /* --- LOADING GATES --- */
+        #loading-screen {
+            position: fixed; inset: 0; z-index: 9999;
+            background: var(--lavender-light); display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            transition: transform 1s cubic-bezier(0.7, 0, 0.3, 1);
+            cursor: pointer;
+        }
+
+        /* --- THINNED TOP BAR --- */
+        #top-bar {
+            position: fixed; top: 0; left: 0; right: 0; height: 60px;
+            background: var(--glass); border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; justify-content: space-between;
+            z-index: 900; backdrop-filter: blur(10px); padding: 0 40px;
+        }
+        #site-title { font-size: 0.65rem; letter-spacing: 6px; text-transform: uppercase; color: var(--lavender-main); font-weight: bold; }
+        #search-input {
+            width: 280px; border: none; border-bottom: 1px solid var(--lavender-light);
+            padding: 4px; text-align: right; font-family: inherit; outline: none;
+            background: transparent; font-style: italic; transition: 0.3s; font-size: 0.85rem;
+        }
+        #search-input:focus { width: 350px; border-color: var(--lavender-main); }
+
+        /* --- ROLODEX (High & Tight) --- */
+        #rolodex {
+            position: fixed; left: 0; top: 80px; width: 50px;
+            display: flex; flex-direction: column; gap: 8px; z-index: 1000;
+        }
+        .rolo-tab {
+            width: 35px; height: 85px; background: white; border: 1px solid var(--border);
+            border-left: none; border-radius: 0 8px 8px 0; cursor: pointer;
+            writing-mode: vertical-rl; text-align: center; font-size: 0.6rem;
+            letter-spacing: 2px; transition: 0.4s; display: flex; align-items: center; justify-content: center;
+        }
+        .rolo-tab:hover, .rolo-tab.active { background: var(--lavender-main); color: white; width: 45px; }
+
+        /* --- REALM HEADER --- */
+        #realm-intro {
+            max-width: 850px; margin: 90px auto 25px; display: flex;
+            align-items: center; gap: 25px; padding: 15px 25px;
+            background: white; border-radius: 12px; border: 1px solid var(--border);
+        }
+        .npc-portrait {
+            width: 100px; height: 100px; border-radius: 50%;
+            background: #eee; object-fit: cover;
+            border: 2px solid var(--lavender-main);
+        }
+        .npc-info h2 { margin: 0; font-weight: 300; letter-spacing: 2px; font-size: 1.2rem; }
+        .npc-info p { margin: 4px 0; font-style: italic; opacity: 0.7; font-size: 0.85rem; line-height: 1.4; }
+
+        /* --- PRODUCT GRID --- */
+        .mosaic-grid {
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 15px; max-width: 1000px; margin: 0 auto 80px;
+        }
+        .product-card {
+            background: white; padding: 20px; border: 1px solid var(--border);
+            border-radius: 4px; text-align: center; text-decoration: none;
+            color: inherit; transition: 0.3s; display: flex; flex-direction: column; align-items: center;
+        }
+        .product-card:hover { transform: translateY(-3px); border-color: var(--lavender-main); background: #fdfbff; }
+        .product-card .icon-box { font-size: 1.8rem; margin-bottom: 12px; opacity: 0.9; }
+        .product-card h4 { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0; color: #444; }
+        .product-card span { font-size: 0.75rem; color: #999; font-style: italic; }
+
+        /* --- CODEX & FOOTER --- */
+        #codex-btn {
+            position: fixed; bottom: 25px; left: 25px; font-size: 1.2rem;
+            cursor: pointer; background: white; width: 45px; height: 45px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 50%; box-shadow: 0 4px 12px rgba(0,0,0,0.08); z-index: 2000;
+            border: 1px solid var(--border);
+        }
+        #codex-overlay {
+            position: fixed; inset: 0; background: rgba(255, 255, 255, 0.9);
+            display: none; align-items: center; justify-content: center; z-index: 3000;
+            backdrop-filter: blur(8px);
+        }
+        #codex-content { background: white; padding: 40px; width: 85%; max-width: 450px; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.05); }
+        
+        footer { text-align: center; padding: 30px; font-size: 0.65rem; letter-spacing: 3px; opacity: 0.4; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+    <div id="loading-screen" onclick="this.style.transform='translateY(-100%)'">
+        <h2 style="letter-spacing: 10px; font-weight: 300; color: var(--lavender-main);">L'AUBE</h2>
+        <p style="font-size: 0.6rem; opacity: 0.5; letter-spacing: 4px;">TAP TO ENTER THE SANCTUARY</p>
+    </div>
+
+    <div id="top-bar">
+        <div id="site-title">L'Aube Sanctuary</div>
+        <input type="text" id="search-input" placeholder="Find a feeling or item..." onkeyup="handleSearch(this.value)">
+    </div>
+
+    <nav id="rolodex">
+        <div class="rolo-tab" onclick="showRealm('Star')">STAR</div>
+        <div class="rolo-tab" onclick="showRealm('Chari')">CHARI</div>
+        <div class="rolo-tab" onclick="showRealm('Milo')">MILO</div>
+        <div class="rolo-tab active" onclick="showRealm('Hans')">HANS</div>
+    </nav>
+
+    <div id="realm-intro">
+        <img id="npc-img" src="" class="npc-portrait">
+        <div class="npc-info">
+            <h2 id="npc-name">NPC Name</h2>
+            <p id="npc-lore">Lore description...</p>
+        </div>
+    </div>
+
+    <div class="mosaic-grid" id="product-grid"></div>
+
+    <div id="codex-btn" onclick="toggleCodex()">📖</div>
+
+    <div id="codex-overlay" onclick="toggleCodex()">
+        <div id="codex-content" onclick="event.stopPropagation()">
+            <h3 style="letter-spacing: 4px; font-weight: 300; border-bottom: 1px solid var(--lavender-light); padding-bottom: 15px;">THE REGENTS</h3>
+            <p style="font-size: 0.9rem;"><b>Star:</b> The vibrant coffee enthusiast. Energetic and warm.</p>
+            <p style="font-size: 0.9rem;"><b>Chari:</b> A delicate soul seeking peace through lavender and soft rituals.</p>
+            <p style="font-size: 0.9rem;"><b>Milo:</b> The mindful scholar. Finds Zen in mint tea and sacred texts.</p>
+            <p style="font-size: 0.9rem;"><b>Hans:</b> A distinguished tea connoisseur. Confident, precise, and deeply academic.</p>
+            <button onclick="toggleCodex()" style="margin-top: 25px; border: 1px solid var(--lavender-main); background: transparent; color: var(--lavender-main); padding: 8px 20px; border-radius: 4px; cursor: pointer; font-size: 0.7rem; letter-spacing: 2px;">RETURN</button>
+        </div>
+    </div>
+
+    <footer>© ESCAPECHIMERACAFE</footer>
+
+    <script>
+        const npcData = {
+            'Hans': {
+                lore: "A distinguished authority on leaf and lore. Hans demands excellence in every steep and strictly adheres to the highest standards of etiquette.",
+                img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200", // Confident portrait
+                items: [
+                    { name: 'Imperial Earl Grey', desc: 'Bergamot-infused perfection.', icon: '☕', tags: 'tea hans classic', link: '#' },
+                    { name: 'Silver Tea Infuser', desc: 'A tool of precision.', icon: '🥄', tags: 'accessory hans metal', link: '#' },
+                    { name: 'The Book of Etiquette', desc: 'Refined social conduct.', icon: '📜', tags: 'book rules hans', link: '#' },
+                    { name: 'Tea Ceremony Guide', desc: 'Strict brewing protocols.', icon: '📖', tags: 'etiquette hans tea', link: '#' },
+                    { name: 'British Empire History', desc: 'The lineage of the leaf.', icon: '🏛️', tags: 'history hans british', link: '#' },
+                    { name: 'A History of Tea', desc: 'From mountain to porcelain.', icon: '🌱', tags: 'history tea hans', link: '#' },
+                    { name: 'Othello', desc: 'William Shakespeare\'s tragedy.', icon: '🎭', tags: 'book shakespeare hans', link: '#' },
+                    { name: 'Bone China Cup', desc: 'The only way to serve.', icon: '🍵', tags: 'accessory hans classic', link: '#' }
+                ]
+            },
+            'Star': { lore: "The energetic barista of the dawn.", img: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=200", items: [] },
+            'Chari': { lore: "Finding solace in the purple fields.", img: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=200", items: [] },
+            'Milo': { lore: "Scholar of Zen and the Word.", img: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=200", items: [] }
+        };
+
+        function showRealm(name) {
+            document.querySelectorAll('.rolo-tab').forEach(t => {
+                t.classList.remove('active');
+                if(t.innerText === name.toUpperCase()) t.classList.add('active');
+            });
+
+            const npc = npcData[name];
+            document.getElementById('npc-name').innerText = name.toUpperCase();
+            document.getElementById('npc-lore').innerText = npc.lore;
+            document.getElementById('npc-img').src = npc.img;
+
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            
+            // Render 8 items (or placeholders if empty)
+            const displayItems = npc.items.length > 0 ? npc.items : Array(8).fill({name: 'Coming Soon', desc: 'Lore in progress...', icon: '✨', link: '#'});
+            
+            displayItems.forEach(item => {
+                const card = document.createElement('a');
+                card.className = 'product-card';
+                card.href = item.link;
+                card.innerHTML = `
+                    <div class="icon-box">${item.icon}</div>
+                    <h4>${item.name}</h4>
+                    <span>${item.desc}</span>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function toggleCodex() {
+            const overlay = document.getElementById('codex-overlay');
+            overlay.style.display = (overlay.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        function handleSearch(query) {
+            const term = query.toLowerCase();
+            if(!term) return showRealm(document.querySelector('.rolo-tab.active').innerText.charAt(0) + document.querySelector('.rolo-tab.active').innerText.slice(1).toLowerCase());
+            
+            const allItems = Object.values(npcData).flatMap(n => n.items);
+            const filtered = allItems.filter(i => i.name.toLowerCase().includes(term) || i.tags?.toLowerCase().includes(term));
+            
+            const grid = document.getElementById('product-grid');
+            grid.innerHTML = '';
+            filtered.forEach(item => {
+                const card = document.createElement('a');
+                card.className = 'product-card';
+                card.innerHTML = `<div class="icon-box">${item.icon}</div><h4>${item.name}</h4><span>${item.desc}</span>`;
+                grid.appendChild(card);
+            });
+        }
+
+        // Default to Hans
+        showRealm('Hans');
+    </script>
+</body>
+</html>
